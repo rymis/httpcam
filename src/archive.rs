@@ -1,5 +1,4 @@
 /// Image archive implementation
-
 use crate::shrx;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
@@ -26,7 +25,13 @@ fn err(s: &str) -> Box<dyn std::error::Error> {
     Box::<dyn std::error::Error>::from(String::from(s))
 }
 
-fn run_thread(path: &str, max_age: u32, fps: u32, max_len: u32, stop: Arc<Mutex<bool>>) -> std::thread::JoinHandle<()> {
+fn run_thread(
+    path: &str,
+    max_age: u32,
+    fps: u32,
+    max_len: u32,
+    stop: Arc<Mutex<bool>>,
+) -> std::thread::JoinHandle<()> {
     let mut time_points: Vec<u64> = vec![];
 
     for i in 0..(if fps <= 60 { fps } else { 60 }) {
@@ -42,8 +47,6 @@ fn run_thread(path: &str, max_age: u32, fps: u32, max_len: u32, stop: Arc<Mutex<
                     return ();
                 }
             }
-
-
         }
     })
 }
@@ -51,7 +54,14 @@ fn run_thread(path: &str, max_age: u32, fps: u32, max_len: u32, stop: Arc<Mutex<
 impl ImageArchive {
     pub fn new(path: &str) -> Result<ImageArchive> {
         shrx::Pattern::new("xxx");
-        Ok(ImageArchive{ path: String::from(path), max_age: 86400 * 10, fps: 1, max_len: 3600, stop: Arc::new(Mutex::new(false)), thread: vec![] })
+        Ok(ImageArchive {
+            path: String::from(path),
+            max_age: 86400 * 10,
+            fps: 1,
+            max_len: 3600,
+            stop: Arc::new(Mutex::new(false)),
+            thread: vec![],
+        })
     }
 
     pub fn set_fps(&mut self, fps: u32) -> Result<u32> {

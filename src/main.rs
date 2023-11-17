@@ -9,10 +9,10 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-pub mod web;
 pub mod archive;
-pub mod shrx;
 pub mod mjpeg;
+pub mod shrx;
+pub mod web;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
@@ -139,7 +139,7 @@ fn flag_to_string(f: &[nokhwa::utils::KnownCameraControlFlag]) -> String {
             nokhwa::utils::KnownCameraControlFlag::WriteOnly => "writeonly",
             nokhwa::utils::KnownCameraControlFlag::Volatile => "volatile",
             nokhwa::utils::KnownCameraControlFlag::Disabled => "disabled",
-        })
+        });
     }
     String::from("unknown")
 }
@@ -154,24 +154,37 @@ fn api_list_controls(cam: &mut Camera, _req: &JsonValue) -> Result<JsonValue> {
             String::from("name"),
             JsonValue::String(control.name().to_string()),
         );
-        ctrl.insert(String::from("flag"), JsonValue::String(flag_to_string(control.flag())));
+        ctrl.insert(
+            String::from("flag"),
+            JsonValue::String(flag_to_string(control.flag())),
+        );
 
         // We can set only known types of values
         let add = match descr {
-            nokhwa::utils::ControlValueDescription::IntegerRange { min, max, value, .. } => {
-                ctrl.insert(String::from("type"), JsonValue::String(String::from("number")));
+            nokhwa::utils::ControlValueDescription::IntegerRange {
+                min, max, value, ..
+            } => {
+                ctrl.insert(
+                    String::from("type"),
+                    JsonValue::String(String::from("number")),
+                );
                 ctrl.insert(String::from("min"), JsonValue::Number(*min as f64));
                 ctrl.insert(String::from("max"), JsonValue::Number(*max as f64));
                 ctrl.insert(String::from("value"), JsonValue::Number(*value as f64));
                 true
-            },
-            nokhwa::utils::ControlValueDescription::FloatRange { min, max, value, .. } => {
-                ctrl.insert(String::from("type"), JsonValue::String(String::from("number")));
+            }
+            nokhwa::utils::ControlValueDescription::FloatRange {
+                min, max, value, ..
+            } => {
+                ctrl.insert(
+                    String::from("type"),
+                    JsonValue::String(String::from("number")),
+                );
                 ctrl.insert(String::from("min"), JsonValue::Number(*min));
                 ctrl.insert(String::from("max"), JsonValue::Number(*max));
                 ctrl.insert(String::from("value"), JsonValue::Number(*value));
                 true
-            },
+            }
 
             _ => false,
         };
@@ -185,7 +198,6 @@ fn api_list_controls(cam: &mut Camera, _req: &JsonValue) -> Result<JsonValue> {
 }
 
 fn api_set_control(cam: &mut Camera, req: &JsonValue) -> Result<JsonValue> {
-
     Ok(JsonValue::Boolean(true))
 }
 
@@ -223,7 +235,7 @@ fn main_err() -> Result<()> {
         RequestedFormat::new::<RgbFormat>(RequestedFormatType::AbsoluteHighestResolution);
     let index = CameraIndex::Index(args.camera);
     let mut camera = Camera::new(index, requested)?;
-    let archive : Option<archive::ImageArchive> = match args.output {
+    let archive: Option<archive::ImageArchive> = match args.output {
         Some(path) => Some(archive::ImageArchive::new(&path)?),
         None => None,
     };
@@ -305,8 +317,8 @@ fn main_err() -> Result<()> {
         match archive {
             Some(ref a) => {
                 println!("Written image {}", a.add_image(frame.buffer())?);
-            },
-            None => ()
+            }
+            None => (),
         };
     }
 
