@@ -235,9 +235,17 @@ fn main_err() -> Result<()> {
         RequestedFormat::new::<RgbFormat>(RequestedFormatType::AbsoluteHighestResolution);
     let index = CameraIndex::Index(args.camera);
     let mut camera = Camera::new(index, requested)?;
-    let archive: Option<archive::ImageArchive> = match args.output {
+    let mut archive: Option<archive::ImageArchive> = match args.output {
         Some(path) => Some(archive::ImageArchive::new(&path)?),
         None => None,
+    };
+
+    match archive {
+        Some(ref mut arch) => {
+            // TODO: set archive parameters
+            arch.run();
+        },
+        None => (),
     };
 
     match args.resolution {
@@ -315,7 +323,7 @@ fn main_err() -> Result<()> {
         srv.update_image(frame.buffer())?;
 
         match archive {
-            Some(ref a) => {
+            Some(ref mut a) => {
                 println!("Written image {}", a.add_image(frame.buffer())?);
             }
             None => (),
